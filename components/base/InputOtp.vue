@@ -85,8 +85,8 @@ const handleInput = (e: Event, index: number) => {
 }
 </script>
 <template>
-  <div class="flex flex-col items-start gap-2 p-6">
-    <div class="flex gap-6">
+  <div>
+    <div class="flex justify-center gap-6">
       <div
         v-for="(item, index) in optNumbers"
         :key="item.id"
@@ -108,7 +108,7 @@ const handleInput = (e: Event, index: number) => {
     </div>
     <p
       v-if="props.error && props.errorMessage"
-      class="text-sm text-red-500"
+      class="mt-2 text-center text-sm text-red-500"
     >
       {{ props.errorMessage }}
     </p>
