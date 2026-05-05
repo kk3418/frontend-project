@@ -2,5 +2,7 @@
 </script>
 
 <template>
-  <BaseInputOtp :length="6" />
+  <div>
+    <BaseInputOtp :length="6" />
+  </div>
 </template>
