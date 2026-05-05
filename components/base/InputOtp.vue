@@ -2,7 +2,10 @@
 import BaseTextInput from './TextInput.vue'
 
 interface Props {
-  length?: number,
+  length?: 4 | 5 | 6 | 7 | 8,
+  disabled?: boolean,
+  error?: boolean,
+  errorMessage?: string,
 }
 
 interface SingleInput {
@@ -11,9 +14,15 @@ interface SingleInput {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  length: 6
+  length: 6,
+  disabled: false,
+  error: false,
+  errorMessage: ''
 })
-// const otpNumber = defineModel<string | number>({ default: '' })
+
+const emit = defineEmits<{
+  complete: [value: string]
+}>()
 
 const optNumbers = reactive<Array<SingleInput>>([])
 const inputRefs = ref<InstanceType<typeof BaseTextInput>[]>([])
@@ -23,6 +32,40 @@ for (let i = 0; i < props.length; i++) {
     value: '',
     id: i
   })
+}
+
+const checkComplete = () => {
+  const allFilled = optNumbers.every(o => o.value !== '')
+  if (allFilled) {
+    emit('complete', optNumbers.map(o => o.value).join(''))
+  }
+}
+
+const handleKeydown = (e: KeyboardEvent, index: number) => {
+  if (e.key === 'Backspace') {
+    if (optNumbers[index].value !== '') {
+      optNumbers[index].value = ''
+    } else if (index > 0) {
+      inputRefs.value[index - 1]?.focus()
+    }
+  }
+}
+
+const handlePaste = (e: ClipboardEvent) => {
+  e.preventDefault()
+  const digits = (e.clipboardData?.getData('text') ?? '').replace(/\D/g, '')
+  if (!digits || digits.length !== props.length) {
+    return
+  }
+
+  let currentIndex = 0
+  digits.split('').forEach((digit) => {
+    optNumbers[currentIndex].value = digit
+    currentIndex += 1
+  })
+
+  inputRefs.value[currentIndex]?.focus()
+  checkComplete()
 }
 
 const handleInput = (e: Event, index: number) => {
@@ -37,23 +80,37 @@ const handleInput = (e: Event, index: number) => {
   if (filtered.length >= 1 && index < props.length - 1) {
     inputRefs.value[index + 1]?.focus()
   }
+
+  checkComplete()
 }
 </script>
 <template>
-  <div class="flex gap-6 p-6">
-    <div
-      v-for="(item, index) in optNumbers"
-      :key="item.id"
-      class="w-20"
-    >
-      <BaseTextInput
-        :ref="(el) => inputRefs[index] = el as InstanceType<typeof BaseTextInput>"
-        v-model="item.value"
-        class="text-center"
-        :max-length="1"
-        inputmode="numeric"
-        @input="handleInput($event, index)"
-      />
+  <div class="flex flex-col items-start gap-2 p-6">
+    <div class="flex gap-6">
+      <div
+        v-for="(item, index) in optNumbers"
+        :key="item.id"
+        class="w-20"
+      >
+        <BaseTextInput
+          :ref="(el) => inputRefs[index] = el as InstanceType<typeof BaseTextInput>"
+          v-model="item.value"
+          class="text-center"
+          :max-length="1"
+          inputmode="numeric"
+          :disabled="props.disabled"
+          :error="props.error"
+          @keydown="handleKeydown($event, index)"
+          @paste="handlePaste($event)"
+          @input="handleInput($event, index)"
+        />
+      </div>
     </div>
+    <p
+      v-if="props.error && props.errorMessage"
+      class="text-sm text-red-500"
+    >
+      {{ props.errorMessage }}
+    </p>
   </div>
 </template>
