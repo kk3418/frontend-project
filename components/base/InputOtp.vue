@@ -51,12 +51,9 @@ const updateModel = () => {
 
 const handleKeydown = (e: KeyboardEvent, index: number) => {
   if (e.key === 'Backspace') {
-    e.preventDefault()
     if (optNumbers[index].value !== '') {
-      optNumbers[index].value = ''
       updateModel()
-    }
-    if (index > 0) {
+    } else if (index > 0) {
       inputRefs.value[index - 1]?.focus()
     }
   }
