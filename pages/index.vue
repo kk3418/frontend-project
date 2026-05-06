@@ -7,7 +7,9 @@ interface optRes {
   }
 }
 
+const otp = ref('')
 const error = ref(false)
+const OTP_LENGTH = 6
 
 const submit = async (value: string) => {
   const res = await $fetch<optRes>('/api/examples/verify-otp-simple', {
@@ -26,13 +28,17 @@ const submit = async (value: string) => {
 <template>
   <div class="grid h-screen w-screen place-content-center">
     <BaseInputOtp
-      :length="6"
+      v-model="otp"
+      :length="OTP_LENGTH"
       :error="error"
       error-message="Invalid Code"
       @complete="submit"
     />
     <div class="flex justify-center">
-      <button class="mt-4 w-20 rounded-full border-2 border-black bg-white px-4 py-2 text-sm text-black outline-0">
+      <button
+        class="mt-4 w-20 rounded-full border-2 border-black bg-white px-4 py-2 text-sm text-black outline-0"
+        @click="submit(otp)"
+      >
         Submit
       </button>
     </div>

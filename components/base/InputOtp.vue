@@ -24,20 +24,28 @@ const emit = defineEmits<{
   complete: [value: string]
 }>()
 
-const optNumbers = reactive<Array<SingleInput>>([])
+const model = defineModel<string>({ default: '' })
+
+const optNumbers = reactive<Array<SingleInput>>(
+  Array.from({ length: props.length }, (_, i) => ({ value: '', id: i }))
+)
 const inputRefs = ref<InstanceType<typeof BaseTextInput>[]>([])
 
-for (let i = 0; i < props.length; i++) {
-  optNumbers.push({
-    value: '',
-    id: i
+watch(() => model.value, (newVal) => {
+  const digits = newVal.split('')
+  optNumbers.forEach((item, i) => {
+    item.value = digits[i] || ''
   })
-}
+}, { immediate: true })
 
-const checkComplete = () => {
-  const allFilled = optNumbers.every(o => o.value !== '')
-  if (allFilled) {
-    emit('complete', optNumbers.map(o => o.value).join(''))
+const updateModel = () => {
+  const currentVal = optNumbers.map(o => o.value).join('')
+  if (model.value !== currentVal) {
+    model.value = currentVal
+  }
+
+  if (currentVal.length === props.length) {
+    emit('complete', currentVal)
   }
 }
 
@@ -46,6 +54,7 @@ const handleKeydown = (e: KeyboardEvent, index: number) => {
     e.preventDefault()
     if (optNumbers[index].value !== '') {
       optNumbers[index].value = ''
+      updateModel()
     }
     if (index > 0) {
       inputRefs.value[index - 1]?.focus()
@@ -60,14 +69,14 @@ const handlePaste = (e: ClipboardEvent) => {
     return
   }
 
-  let currentIndex = 0
-  digits.split('').forEach((digit) => {
-    optNumbers[currentIndex].value = digit
-    currentIndex += 1
+  digits.split('').forEach((digit, i) => {
+    if (optNumbers[i]) {
+      optNumbers[i].value = digit
+    }
   })
 
-  inputRefs.value[currentIndex]?.focus()
-  checkComplete()
+  inputRefs.value[props.length - 1]?.focus()
+  updateModel()
 }
 
 const handleInput = (e: Event, index: number) => {
@@ -83,7 +92,7 @@ const handleInput = (e: Event, index: number) => {
     inputRefs.value[index + 1]?.focus()
   }
 
-  checkComplete()
+  updateModel()
 }
 </script>
 <template>
