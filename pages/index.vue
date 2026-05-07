@@ -27,6 +27,14 @@ const submit = async (value: SingleInput[]) => {
     error.value = true
   }
 }
+
+watch(() => otp.value, (newValue) => {
+  const currentVal = newValue.map(o => o.value).join('')
+
+  if (currentVal.length <= OTP_LENGTH) {
+    error.value = false
+  }
+}, { deep: true })
 </script>
 
 <template>
