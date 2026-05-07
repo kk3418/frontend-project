@@ -8,7 +8,7 @@ interface Props {
   errorMessage?: string,
 }
 
-interface SingleInput {
+export interface SingleInput {
   value: number | string,
   id: number,
 }
@@ -21,37 +21,30 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<{
-  complete: [value: string]
+  complete: [value: Array<SingleInput>]
 }>()
 
-const model = defineModel<string>({ default: '' })
+const model = defineModel<Array<SingleInput>>({ default: () => [] })
 
-const optNumbers = reactive<Array<SingleInput>>(
-  Array.from({ length: props.length }, (_, i) => ({ value: '', id: i }))
-)
-const inputRefs = ref<InstanceType<typeof BaseTextInput>[]>([])
-
-watch(() => model.value, (newVal) => {
-  const digits = newVal.split('')
-  optNumbers.forEach((item, i) => {
-    item.value = digits[i] || ''
-  })
+watch(() => model.value, (newValue) => {
+  if (newValue.length === 0) {
+    model.value = Array.from({ length: props.length }, (_, i) => ({ value: '', id: i }))
+  }
 }, { immediate: true })
 
+const inputRefs = ref<InstanceType<typeof BaseTextInput>[]>([])
+
 const updateModel = () => {
-  const currentVal = optNumbers.map(o => o.value).join('')
-  if (model.value !== currentVal) {
-    model.value = currentVal
-  }
+  const currentVal = model.value.map(o => o.value).join('')
 
   if (currentVal.length === props.length) {
-    emit('complete', currentVal)
+    emit('complete', model.value)
   }
 }
 
 const handleKeydown = (e: KeyboardEvent, index: number) => {
   if (e.key === 'Backspace') {
-    if (optNumbers[index].value !== '') {
+    if (model.value[index].value !== '') {
       updateModel()
     } else if (index > 0) {
       inputRefs.value[index - 1]?.focus()
@@ -67,8 +60,8 @@ const handlePaste = (e: ClipboardEvent) => {
   }
 
   digits.split('').forEach((digit, i) => {
-    if (optNumbers[i]) {
-      optNumbers[i].value = digit
+    if (model.value[i]) {
+      model.value[i].value = digit
     }
   })
 
@@ -80,7 +73,7 @@ const handleInput = (e: Event, index: number) => {
   const input = e.target as HTMLInputElement
   const filtered = input.value.replace(/\D/g, '')
 
-  const target = optNumbers[index]
+  const target = model.value[index]
   if (target) {
     target.value = filtered
   }
@@ -96,7 +89,7 @@ const handleInput = (e: Event, index: number) => {
   <div>
     <div class="flex justify-center gap-6">
       <div
-        v-for="(item, index) in optNumbers"
+        v-for="(item, index) in model"
         :key="item.id"
         class="w-20"
       >

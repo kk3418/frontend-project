@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { SingleInput } from '~/components/base/InputOtp.vue'
+
 interface optRes {
   success: boolean,
   data?: {
@@ -7,14 +9,16 @@ interface optRes {
   }
 }
 
-const otp = ref('')
+const otp = ref<SingleInput[]>([])
 const error = ref(false)
 const OTP_LENGTH = 6
 
-const submit = async (value: string) => {
+const submit = async (value: SingleInput[]) => {
+  const otpValue = value.map(i => i.value).join('')
+
   const res = await $fetch<optRes>('/api/examples/verify-otp-simple', {
     method: 'POST',
-    body: { otp: value }
+    body: { otp: otpValue }
   })
 
   if (res.success && res.data?.verified) {
