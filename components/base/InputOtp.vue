@@ -21,10 +21,6 @@ const props = withDefaults(defineProps<Props>(), {
   errorMessage: ''
 })
 
-const emit = defineEmits<{
-  complete: [value: Array<SingleInput>]
-}>()
-
 const model = defineModel<Array<SingleInput>>({ default: () => [] })
 
 watch(() => model.value, (newValue) => {
@@ -47,20 +43,9 @@ const handleCompositionEnd = (e: Event, index: number) => {
   isComposing.value = false
   handleInput(e, index)
 }
-
-const updateModel = () => {
-  const currentVal = model.value.map(o => o.value).join('')
-
-  if (currentVal.length === props.length) {
-    emit('complete', model.value)
-  }
-}
-
 const handleKeydown = (e: KeyboardEvent, index: number) => {
   if (e.key === 'Backspace') {
-    if (model.value[index].value !== '') {
-      updateModel()
-    } else if (index > 0) {
+    if (index > 0 && model.value[index].value === '') {
       inputRefs.value[index - 1]?.focus()
     }
   }
@@ -80,7 +65,6 @@ const handlePaste = (e: ClipboardEvent) => {
   })
 
   inputRefs.value[props.length - 1]?.focus()
-  updateModel()
 }
 
 const handleInput = (e: Event, index: number) => {
@@ -96,7 +80,6 @@ const handleInput = (e: Event, index: number) => {
     inputRefs.value[index + 1]?.focus()
   }
 
-  updateModel()
 }
 </script>
 <template>

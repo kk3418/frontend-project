@@ -31,8 +31,12 @@ const submit = async (value: SingleInput[]) => {
 watch(() => otp.value, (newValue) => {
   const currentVal = newValue.map(o => o.value).join('')
 
-  if (currentVal.length <= OTP_LENGTH) {
+  if (currentVal.length < OTP_LENGTH) {
     error.value = false
+  }
+
+  if (currentVal.length === OTP_LENGTH) {
+    submit(newValue)
   }
 }, { deep: true })
 </script>
@@ -44,7 +48,6 @@ watch(() => otp.value, (newValue) => {
       :length="OTP_LENGTH"
       :error="error"
       error-message="Invalid Code"
-      @complete="submit"
     />
     <div class="flex justify-center">
       <button
