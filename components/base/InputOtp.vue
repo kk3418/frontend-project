@@ -3,6 +3,7 @@ import BaseTextInput from './TextInput.vue'
 
 interface Props {
   length?: 4 | 5 | 6 | 7 | 8,
+  n?: number,
   disabled?: boolean,
   error?: boolean,
   errorMessage?: string,
@@ -33,6 +34,19 @@ watch(() => model.value, (newValue) => {
 }, { immediate: true })
 
 const inputRefs = ref<InstanceType<typeof BaseTextInput>[]>([])
+
+const isComposing = ref(false)
+const handleCompositionStart = () => {
+  isComposing.value = true
+}
+const handleCompositionUpdate = (e: Event) => {
+  const input = e.target as HTMLInputElement
+  input.value = ''
+}
+const handleCompositionEnd = (e: Event, index: number) => {
+  isComposing.value = false
+  handleInput(e, index)
+}
 
 const updateModel = () => {
   const currentVal = model.value.map(o => o.value).join('')
@@ -104,6 +118,9 @@ const handleInput = (e: Event, index: number) => {
           @keydown="handleKeydown($event, index)"
           @paste="handlePaste($event)"
           @input="handleInput($event, index)"
+          @compositionstart="handleCompositionStart()"
+          @compositionupdate="handleCompositionUpdate($event)"
+          @compositionend="handleCompositionEnd($event, index)"
         />
       </div>
     </div>
