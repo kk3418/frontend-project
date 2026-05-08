@@ -47,6 +47,7 @@ watch(() => otp.value, (newValue) => {
       v-model="otp"
       :length="OTP_LENGTH"
       :error="error"
+      :n="2"
       error-message="Invalid Code"
     />
     <div class="flex justify-center">

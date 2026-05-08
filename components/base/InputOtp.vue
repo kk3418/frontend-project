@@ -16,10 +16,13 @@ export interface SingleInput {
 
 const props = withDefaults(defineProps<Props>(), {
   length: 6,
+  n: 1,
   disabled: false,
   error: false,
   errorMessage: ''
 })
+
+const columnsPerRow = computed(() => Math.ceil(props.length / props.n))
 
 const model = defineModel<Array<SingleInput>>({ default: () => [] })
 
@@ -83,11 +86,13 @@ const handleInput = (value: string | number, index: number) => {
 </script>
 <template>
   <div>
-    <div class="flex justify-center gap-6">
+    <div
+      class="grid justify-center gap-4"
+      :style="{ gridTemplateColumns: `repeat(${columnsPerRow}, 5rem)` }"
+    >
       <div
         v-for="(item, index) in model"
         :key="item.id"
-        class="w-20"
       >
         <BaseTextInput
           :ref="(el) => inputRefs[index] = el as InstanceType<typeof BaseTextInput>"
