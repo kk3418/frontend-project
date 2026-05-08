@@ -41,7 +41,8 @@ const handleCompositionUpdate = (e: Event) => {
 }
 const handleCompositionEnd = (e: Event, index: number) => {
   isComposing.value = false
-  handleInput(e, index)
+  const input = e.target as HTMLInputElement
+  handleInput(input.value, index)
 }
 const handleKeydown = (e: KeyboardEvent, index: number) => {
   if (e.key === 'Backspace') {
@@ -67,9 +68,8 @@ const handlePaste = (e: ClipboardEvent) => {
   inputRefs.value[props.length - 1]?.focus()
 }
 
-const handleInput = (e: Event, index: number) => {
-  const input = e.target as HTMLInputElement
-  const filtered = input.value.replace(/\D/g, '')
+const handleInput = (value: string | number, index: number) => {
+  const filtered = String(value).replace(/\D/g, '')
 
   const target = model.value[index]
   if (target) {
@@ -79,7 +79,6 @@ const handleInput = (e: Event, index: number) => {
   if (filtered.length >= 1 && index < props.length - 1) {
     inputRefs.value[index + 1]?.focus()
   }
-
 }
 </script>
 <template>
@@ -100,7 +99,7 @@ const handleInput = (e: Event, index: number) => {
           :error="props.error"
           @keydown="handleKeydown($event, index)"
           @paste="handlePaste($event)"
-          @input="handleInput($event, index)"
+          @update:model-value="handleInput($event, index)"
           @compositionstart="handleCompositionStart()"
           @compositionupdate="handleCompositionUpdate($event)"
           @compositionend="handleCompositionEnd($event, index)"
