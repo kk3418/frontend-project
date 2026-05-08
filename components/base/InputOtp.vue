@@ -48,6 +48,11 @@ const handleCompositionEnd = (e: Event, index: number) => {
   handleInput(input.value, index)
 }
 const handleKeydown = (e: KeyboardEvent, index: number) => {
+  if (e.key.startsWith('Arrow')) {
+    e.preventDefault()
+    return
+  }
+
   if (e.key === 'Backspace') {
     if (index > 0 && model.value[index].value === '') {
       inputRefs.value[index - 1]?.focus()
